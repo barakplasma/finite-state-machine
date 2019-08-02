@@ -34,7 +34,7 @@ anFSM.getCurrentState() // 'off'
 - To use the `FSM` class in a JavaScript file -
 
 ```js
-const FSM = require('my-amazing-lib').FSM;
+const FSM = require('@barakplasma/finite-state-machine').FSM;
 
 const anFSM = new FSM();
 
