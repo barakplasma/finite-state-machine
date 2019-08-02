@@ -39,6 +39,9 @@ export class FSM {
   public dispatch = (input: IInput) => {
     const transitionHandler = this.transitions.get(input.inputName) || this.missingTransitionHandlerError;
     const newState = transitionHandler(input.payload).get(this.currentState);
+    if (!this.states.has(newState)) {
+      throw new Error('unknown new current state');
+    }
     this.currentState = newState;
   }
 
