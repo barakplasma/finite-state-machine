@@ -1,16 +1,14 @@
 {
-  "name": "finite-state-machine",
-  "version": "0.0.0",
+  "name": "@barakplasma/finite-state-machine",
+  "version": "0.0.1",
   "description": "finite-state-machine",
   "license": "MIT",
-  "repository": "",
-  "author": {
-    "name": "Michael Salaverry",
-    "url": "https://github.com/barakplasma"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/barakplasma/finite-state-machine.git"
   },
-  "keywords": [
-    ""
-  ],
+  "author": "Michael Salaverry (https://github.com/barakplasma)",
+  "keywords": [],
   "files": [
     "lib"
   ],
@@ -47,5 +45,12 @@
   },
   "jest": {
     "preset": "ts-jest"
-  }
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "bugs": {
+    "url": "https://github.com/barakplasma/finite-state-machine/issues"
+  },
+  "homepage": "https://github.com/barakplasma/finite-state-machine#readme"
 }

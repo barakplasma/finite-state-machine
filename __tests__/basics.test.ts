@@ -34,14 +34,12 @@ describe('Finite State Machine', () => {
     // Action
     anFSM.addState('on');
     // we're missing the 'off' state
-    const shouldThrow = () => anFSM.on({inputName: 'toggle'}, () => {
-      return new Map([
-        ['on','off'],
-        ['off', 'on'],
-      ])
-    })
+    const shouldThrow = () =>
+      anFSM.on({ inputName: 'toggle' }, () => {
+        return new Map([['on', 'off'], ['off', 'on']]);
+      });
     // Assert
-    expect(shouldThrow).toThrow('unknown state in transition handler')
+    expect(shouldThrow).toThrow('unknown state in transition handler');
   });
   it('should allow transitioning between states', () => {
     // Arrange
@@ -49,15 +47,12 @@ describe('Finite State Machine', () => {
     // Action
     anFSM.addState('on');
     anFSM.addState('off');
-    anFSM.on({inputName: 'toggle'}, () => {
-      return new Map([
-        ['on','off'],
-        ['off', 'on'],
-      ])
-    })
+    anFSM.on({ inputName: 'toggle' }, () => {
+      return new Map([['on', 'off'], ['off', 'on']]);
+    });
     const { dispatch } = anFSM;
     // Action
-    dispatch({inputName: 'toggle'});
+    dispatch({ inputName: 'toggle' });
     // Assert
     expect(anFSM.getCurrentState()).toEqual('off');
   });
@@ -67,33 +62,27 @@ describe('Finite State Machine', () => {
     // Action
     fuse.addState('closed');
     fuse.addState('open');
-    fuse.on({inputName: 'powerSurge'}, (payload) => {
+    fuse.on({ inputName: 'powerSurge' }, payload => {
       if (payload > 100) {
-        return new Map([
-          ['closed', 'open'],
-          ['open', 'open'],
-        ]);
+        return new Map([['closed', 'open'], ['open', 'open']]);
       }
-      return new Map([
-        ['closed', 'closed'],
-        ['open', 'open'],
-      ])
-    })
+      return new Map([['closed', 'closed'], ['open', 'open']]);
+    });
     const { dispatch } = fuse;
     // Action
-    dispatch({inputName: 'powerSurge', payload: 99});
+    dispatch({ inputName: 'powerSurge', payload: 99 });
     // Assert
     expect(fuse.getCurrentState()).toEqual('closed');
     // Action
-    dispatch({inputName: 'powerSurge', payload: 99});
+    dispatch({ inputName: 'powerSurge', payload: 99 });
     // Assert
     expect(fuse.getCurrentState()).toEqual('closed');
     // Action
-    dispatch({inputName: 'powerSurge', payload: 101});
+    dispatch({ inputName: 'powerSurge', payload: 101 });
     // Assert
     expect(fuse.getCurrentState()).toEqual('open');
     // Action
-    dispatch({inputName: 'powerSurge', payload: 99});
+    dispatch({ inputName: 'powerSurge', payload: 99 });
     // Assert
     expect(fuse.getCurrentState()).toEqual('open');
   });
@@ -102,23 +91,23 @@ describe('Finite State Machine', () => {
     const enum TrafficLightColors {
       'red' = 'red',
       'yellow' = 'yellow',
-      'green' = 'green'
+      'green' = 'green',
     }
     const TrafficLightFactory = () => {
       const TrafficLight = new FSM();
-      
+
       TrafficLight.addState(TrafficLightColors.red);
       TrafficLight.addState(TrafficLightColors.yellow);
       TrafficLight.addState(TrafficLightColors.green);
-      TrafficLight.on({inputName: 'turnExpired'}, () => {
+      TrafficLight.on({ inputName: 'turnExpired' }, () => {
         return new Map([
           [TrafficLightColors.green, TrafficLightColors.yellow],
           [TrafficLightColors.yellow, TrafficLightColors.red],
           [TrafficLightColors.red, TrafficLightColors.green],
-        ])
+        ]);
       });
       return TrafficLight;
-    }
+    };
 
     const NSTrafficLight = TrafficLightFactory();
     const EWTrafficLight = TrafficLightFactory();
@@ -126,7 +115,7 @@ describe('Finite State Machine', () => {
     expect(NSTrafficLight.getCurrentState()).toEqual(TrafficLightColors.red);
     expect(EWTrafficLight.getCurrentState()).toEqual(TrafficLightColors.red);
     // changing one shouldn't change the other
-    NSTrafficLight.dispatch({inputName: 'turnExpired'});
+    NSTrafficLight.dispatch({ inputName: 'turnExpired' });
     expect(NSTrafficLight.getCurrentState()).toEqual(TrafficLightColors.green);
     expect(EWTrafficLight.getCurrentState()).toEqual(TrafficLightColors.red);
     // let's connect one to the other using a third object
@@ -143,36 +132,43 @@ describe('Finite State Machine', () => {
         this.mediatorFSM.addState(trafficStates.trafficMoving);
         this.mediatorFSM.addState(trafficStates.trafficStopping);
         this.mediatorFSM.addState(trafficStates.allTrafficStopped);
-        this.mediatorFSM.on({inputName: 'tick'}, (payload: TrafficLightColors[] | undefined) => {
-          if (payload) {
-          const isTrafficMoving = () => payload.find(tl => tl === TrafficLightColors.green) !== undefined;
+        this.mediatorFSM.on(
+          { inputName: 'tick' },
+          (payload: TrafficLightColors[] | undefined) => {
+            if (payload) {
+              const isTrafficMoving = () =>
+                payload.find(tl => tl === TrafficLightColors.green) !==
+                undefined;
 
-          switch (true) {
-            case isTrafficMoving():
-              const movingTL = this.trafficLights.find(tl => 
-                tl.getCurrentState() === TrafficLightColors.green
-              )
-              if (movingTL) {
-                movingTL.dispatch({inputName: 'turnExpired'})
+              switch (true) {
+                case isTrafficMoving():
+                  const movingTL = this.trafficLights.find(
+                    tl => tl.getCurrentState() === TrafficLightColors.green
+                  );
+                  if (movingTL) {
+                    movingTL.dispatch({ inputName: 'turnExpired' });
+                  }
+                  break;
+                default:
+                  this.trafficLights.forEach(tl =>
+                    tl.dispatch({ inputName: 'turnExpired' })
+                  );
+                  break;
               }
-              break;
-            default:
-              this.trafficLights.forEach(tl => tl.dispatch({inputName: 'turnExpired'}))
-              break;
+            }
+            return new Map([
+              [trafficStates.allTrafficStopped, trafficStates.trafficMoving],
+              [trafficStates.trafficMoving, trafficStates.trafficStopping],
+              [trafficStates.trafficStopping, trafficStates.allTrafficStopped],
+            ]);
           }
-        }
-          return new Map([
-            [trafficStates.allTrafficStopped, trafficStates.trafficMoving],
-            [trafficStates.trafficMoving, trafficStates.trafficStopping],
-            [trafficStates.trafficStopping, trafficStates.allTrafficStopped],
-          ])
-        })
+        );
       }
       turnExpired = () => {
         const payload = this.trafficLights.map(tl => tl.getCurrentState());
-        this.mediatorFSM.dispatch({inputName: 'tick', payload});
-      }
-    };
+        this.mediatorFSM.dispatch({ inputName: 'tick', payload });
+      };
+    }
     const TLM = new TrafficLightMediator([NSTrafficLight, EWTrafficLight]);
     // Action start stopping traffic
     TLM.turnExpired();
@@ -194,5 +190,5 @@ describe('Finite State Machine', () => {
     // Assert end of fourth turn
     expect(NSTrafficLight.getCurrentState()).toEqual(TrafficLightColors.green);
     expect(EWTrafficLight.getCurrentState()).toEqual(TrafficLightColors.red);
-  })
+  });
 });
